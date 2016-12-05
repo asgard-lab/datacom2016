@@ -1,0 +1,65 @@
+# Physical interface 1
+auto em1
+iface em1 inet dhcp
+
+# Physical interface 2
+auto em2
+iface em2 inet manual
+
+# Container management VLAN interface
+iface em2.10 inet manual
+    vlan-raw-device em2
+
+# OpenStack Networking VXLAN (tunnel/overlay) VLAN interface
+iface em2.30 inet manual
+    vlan-raw-device em2
+
+# Storage network VLAN interface (optional)
+iface em2.20 inet manual
+    vlan-raw-device em2
+
+
+# Container management bridge
+auto br-mgmt
+iface br-mgmt inet static
+    bridge_stp off
+    bridge_waitport 0
+    bridge_fd 0
+    # Bridge port references tagged interface
+    bridge_ports em2.10
+    address 172.29.236.11
+    netmask 255.255.252.0
+    dns-nameservers 200.18.99.1 200.133.224.5
+
+# OpenStack Networking VXLAN (tunnel/overlay) bridge
+auto br-vxlan
+iface br-vxlan inet static
+    bridge_stp off
+    bridge_waitport 0
+    bridge_fd 0
+    # Bridge port references tagged interface
+    bridge_ports em2.30
+    address 172.29.240.11
+    netmask 255.255.252.0
+
+# OpenStack Networking VLAN bridge
+auto br-vlan
+iface br-vlan inet manual
+    bridge_stp off
+    bridge_waitport 0
+    bridge_fd 0
+    # Bridge port references untagged interface
+    bridge_ports em2
+
+# Storage bridge (optional)
+auto br-storage
+iface br-storage inet static
+    bridge_stp off
+    bridge_waitport 0
+    bridge_fd 0
+    # Bridge port reference tagged interface
+    bridge_ports em2.20
+    address 172.29.244.11
+    netmask 255.255.252.0
+
+

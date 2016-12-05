@@ -1,0 +1,32 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto eth0
+iface eth0 inet dhcp
+# This is an autoconfigured IPv6 interface
+iface eth0 inet6 auto
+
+auto eth1
+iface eth1 inet static
+address 10.240.0.1
+netmask 255.255.255.0
+
+iface eth1.10 inet manual
+    vlan-raw-device eth1
+
+auto br-mgmt
+iface br-mgmt inet static
+    bridge_stp off
+    bridge_waitport 0
+    bridge_fd 0
+    # Bridge port references tagged interface
+    bridge_ports eth1.10
+    address 172.29.236.1
+    netmask 255.255.252.0
+    dns-nameservers 200.18.99.1 200.133.224.5
+
