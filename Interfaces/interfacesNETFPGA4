@@ -7,14 +7,17 @@ auto em1
 iface em1 inet manual
 
 # Container management VLAN interface
+auto em1.10
 iface em1.10 inet manual
     vlan-raw-device em1
 
 # OpenStack Networking VXLAN (tunnel/overlay) VLAN interface
+auto em1.30
 iface em1.30 inet manual
     vlan-raw-device em1
 
 # Storage network VLAN interface (optional)
+auto em1.20
 iface em1.20 inet manual
     vlan-raw-device em1
 
@@ -28,6 +31,7 @@ iface br-mgmt inet static
     # Bridge port references tagged interface
     bridge_ports em1.10
     address 172.29.236.122
+    gateway 172.29.236.1
     netmask 255.255.252.0
     dns-nameservers 200.18.99.1 200.133.224.5
 

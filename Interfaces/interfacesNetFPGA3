@@ -7,14 +7,17 @@ auto eth1
 iface eth1 inet manual
 
 # Container management VLAN interface
+auto eth1.10
 iface eth1.10 inet manual
     vlan-raw-device eth1
 
 # OpenStack Networking VXLAN (tunnel/overlay) VLAN interface
+auto eth1.30
 iface eth1.30 inet manual
     vlan-raw-device eth1
 
 # Storage network VLAN interface (optional)
+auto eth1.20
 iface eth1.20 inet manual
     vlan-raw-device eth1
 
@@ -28,6 +31,7 @@ iface br-mgmt inet static
     # Bridge port references tagged interface
     bridge_ports eth1.10
     address 172.29.236.121
+    gateway 172.29.236.1
     netmask 255.255.252.0
     dns-nameservers 200.18.99.1 200.133.224.5
 

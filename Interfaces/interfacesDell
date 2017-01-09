@@ -7,14 +7,17 @@ auto em2
 iface em2 inet manual
 
 # Container management VLAN interface
+auto em2.10
 iface em2.10 inet manual
     vlan-raw-device em2
 
 # OpenStack Networking VXLAN (tunnel/overlay) VLAN interface
+auto em2.30
 iface em2.30 inet manual
     vlan-raw-device em2
 
 # Storage network VLAN interface (optional)
+auto em2.20
 iface em2.20 inet manual
     vlan-raw-device em2
 
@@ -29,7 +32,16 @@ iface br-mgmt inet static
     bridge_ports em2.10
     address 172.29.236.11
     netmask 255.255.252.0
+    gateway 172.29.236.1
     dns-nameservers 200.18.99.1 200.133.224.5
+
+# OpenStack Networking VXLAN (tunnel/overlay) bridge
+#
+# Only the COMPUTE and NETWORK nodes must have an IP address
+# on this bridge. When used by infrastructure nodes, the
+# IP addresses are assigned to containers which use this
+# bridge.
+#
 
 # OpenStack Networking VXLAN (tunnel/overlay) bridge
 auto br-vxlan
@@ -53,13 +65,10 @@ iface br-vlan inet manual
 
 # Storage bridge (optional)
 auto br-storage
-iface br-storage inet static
+iface br-storage inet manual
     bridge_stp off
     bridge_waitport 0
     bridge_fd 0
-    # Bridge port reference tagged interface
     bridge_ports em2.20
-    address 172.29.244.11
-    netmask 255.255.252.0
 
 
