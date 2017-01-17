@@ -1,0 +1,95 @@
+---
+- hosts: netfpga
+  tasks:
+  - name: Instalação do java
+    yum: name=java state=latest
+
+  - name: Instalação das ferramentas
+    yum: state=latest name={{item}}
+    with_items:
+    - java-devel
+    - libnet-devel
+    - libpcap-devel
+    - gcc
+    - kernel-devel
+    - java-1.6.0-openjdk-devel
+    - python-argparse
+    - scapy
+    - wget
+    - iverilog
+    - gtkwave
+    - hping3
+    - iperf
+
+#  - name: Download do pacote
+#    get_url: url=http://netfpga.org/yum/el5/RPMS/noarch/netfpga-repo-1-1_CentOS5.noarch.rpm dest=/tmp/netfpga-repo-1-1_CentOS5.noarch.rpm
+
+#  - name: Instalação do repositório yum NetFPGA e chave gpg
+#    yum: name=/tmp/netfpga-repo-1-1_CentOS5.noarch.rpm state=present
+
+  - name: Instalação do repositório yum NetFPGA e da chave GPG
+    shell: rpm -Uhv http://netfpga.org/yum/el5/RPMS/noarch/netfpga-repo-1-1_CentOS5.noarch.rpm
+
+  - name: Instalação da última versão do NetFPGA
+    yum: name=netfpga-base state=latest
+
+  - name: Script para copiar o diretório NetFPGA e setar variáveis ambiente
+    shell: /usr/local/netfpga/lib/scripts/user_account_setup/user_account_setup.pl
+
+  - name: Instalação do NetFPGA-gui
+    yum: name=netfpga-gui state=latest
+
+  - name: Compilação dos drivers e das ferramentas - build
+    make: chdir=~/netfpga/
+
+  - name: Compilação dos drivers e das ferramentas - install
+    make: chdir=~/netfpga/ target=install
+
+  - name: Script para instalação dos módulos de memória
+    shell: /usr/local/netfpga/lib/scripts/fetch_mem_models/fetch_mem_models.pl
+
+  - name: Checando se comando existe no rc.local (Script que reprograma CPI)
+    shell: cat /etc/rc.local | grep cpci_reprogram.pl | wc -l
+    register: test_grep
+
+  - debug: msg="{{test_grep.stdout}}"
+
+  - name: Adicionando comando ao rc.local
+    lineinfile: dest=/etc/rc.local line="/usr/local/netfpga/lib/scripts/cpci_reprogram/cpci_reprogram.pl --all"
+    when: test_grep.stdout == "0"
+
+  - name: Instalação do módulo perl-CPAN
+    yum: name=perl-CPAN state=latest
+
+  - name: download cpanm
+    get_url: url=https://cpanmin.us/ dest=/tmp/cpanm.pl mode=755
+
+  - name: Instalação do cpanm para poder usar o módulo cpanm
+    command: perl cpanm.pl App::cpanminus
+    args:
+      chdir: /tmp/
+      creates: /usr/local/bin/cpanm
+
+  - name: Adicionar link simbólico para /usr/bin/
+    file: src=/usr/local/bin/cpanm
+          dest=/usr/bin/cpanm
+          state=link
+
+  - name: Instalação do módulo XML::Simple Perl usando cpanm
+    cpanm: name=XML::Simple
+
+  - name: Instalação do módulo Switch
+    cpanm: name=Switch
+
+#  - name: Criando link entre arquivos
+#    shell: ln -s /usr/lib64/libncurses.so.5 /usr/local/lib/libncurses.so
+
+  - name: Criando link entre arquivos
+    file: src=/usr/lib64/libncurses.so dest=/usr/local/lib/libncurses.so state=link
+
+  - name: Instalação da biblioteca ncurses
+    yum: state=latest name={{item}}
+    with_items:
+    - ncurses-devel 
+    - ncurses
+
