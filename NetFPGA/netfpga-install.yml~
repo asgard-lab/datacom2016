@@ -21,8 +21,8 @@
     - hping3
     - iperf
 
-  - name: Download do pacote
-    get_url: url=http://netfpga.org/yum/el5/RPMS/noarch/netfpga-repo-1-1_CentOS5.noarch.rpm dest=/tmp/netfpga-repo-1-1_CentOS5.noarch.rpm
+#  - name: Download do pacote
+#    get_url: url=http://netfpga.org/yum/el5/RPMS/noarch/netfpga-repo-1-1_CentOS5.noarch.rpm dest=/tmp/netfpga-repo-1-1_CentOS5.noarch.rpm
 
 #  - name: Instalação do repositório yum NetFPGA e chave gpg
 #    yum: name=/tmp/netfpga-repo-1-1_CentOS5.noarch.rpm state=present
@@ -39,13 +39,11 @@
   - name: Instalação do NetFPGA-gui
     yum: name=netfpga-gui state=latest
 
-  - name: Compilação dos drivers e das ferramentas
-    shell: "{{ item }}"
-    args:
-      chdir: "~/netfpga/"
-    with_items:
-      - make
-      - make install
+  - name: Compilação dos drivers e das ferramentas - build
+    make: chdir=~/netfpga/
+
+  - name: Compilação dos drivers e das ferramentas - install
+    make: chdir=~/netfpga/ target=install
 
   - name: Script para instalação dos módulos de memória
     shell: /usr/local/netfpga/lib/scripts/fetch_mem_models/fetch_mem_models.pl
@@ -82,6 +80,9 @@
 
   - name: Instalação do módulo Switch
     cpanm: name=Switch
+
+#  - name: Criando link entre arquivos
+#    shell: ln -s /usr/lib64/libncurses.so.5 /usr/local/lib/libncurses.so
 
   - name: Criando link entre arquivos
     file: src=/usr/lib64/libncurses.so dest=/usr/local/lib/libncurses.so state=link
